@@ -19,7 +19,6 @@ export default function List({ onListChange }) {
   }
 
   function handleSelectChange(event) {
-    console.log("EVENT", event.target.value);
     onListChange(event.target.value);
   }
 

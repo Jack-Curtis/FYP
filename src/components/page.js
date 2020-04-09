@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import Chart from "./components/chart";
-import List from "./components/list";
-import { calibrate } from "./utils";
-import ConnectButton from "./components/connectButton";
-import DisconnectButton from "./components/disconnectButton";
+import Chart from "./chart";
+import List from "./list";
+import { StartStreaming, StopStreaming } from "./streamingButtons";
+import { calibrate, connectToImu, disconnectImu } from "../utils/utils";
 
 export default function Page() {
   const [selectedDevices, setSelectedDevices] = useState(["-", "-", "-", "-"]);
@@ -11,8 +10,13 @@ export default function Page() {
   var socket = [];
   var count = 0;
 
+  useEffect(() => {
+    socket = new WebSocket("ws://localhost:8080");
+    socket.onopen = openSocket;
+    socket.onmessage = showData;
+  }, []);
+
   function openSocket() {
-    // console.log("Socket open");
     socket.send("Connection established");
   }
 
@@ -35,13 +39,6 @@ export default function Page() {
     });
   }
 
-  useEffect(() => {
-    socket = [];
-    socket = new WebSocket("ws://localhost:8080");
-    socket.onopen = openSocket;
-    socket.onmessage = showData;
-  }, []);
-
   function IMU(imuId) {
     function handleListChange(value) {
       var state = selectedDevices;
@@ -53,19 +50,14 @@ export default function Page() {
       <div>
         <h3>IMU {imuId + 1}:</h3>
         {<List imuId={imuId} onListChange={handleListChange}></List>}
-
-        {/* TODO: */}
-        {/* Change the connect button so on click it fetches the path, change for disconnect too */}
-        <ConnectButton devicePath={selectedDevices[imuId]}></ConnectButton>
-        <DisconnectButton
-          devicePath={selectedDevices[imuId]}
-        ></DisconnectButton>
+        <button onClick={() => connectToImu(selectedDevices[imuId])}>
+          Connect
+        </button>
+        <button onClick={() => disconnectImu(selectedDevices[imuId])}>
+          Disconnect
+        </button>
       </div>
     );
-  }
-
-  function renderChart() {
-    return <Chart data={data}></Chart>;
   }
 
   return (
@@ -74,11 +66,8 @@ export default function Page() {
       {IMU(0)}
       {/* {IMU2(1)} */}
       <button onClick={() => calibrate()}>CALIBRATE IMUs</button>
-      {/* TODO:
-      Give these buttons their own components, or do in the same file? */}
-      {/* <button onClick={() => startStreaming(0)}>START STREAMING</button>
-      <button onClick={() => stopStreaming(0)}>STOP STREAMING</button> */}
-      {/* {renderChart()} */}
+      <StartStreaming></StartStreaming>
+      <StopStreaming></StopStreaming>
       <Chart data={data}></Chart>;
     </div>
   );

@@ -10,7 +10,6 @@ export async function connectToImu(devicePath) {
 }
 
 export async function disconnectImu(devicePath) {
-  // console.log("Disconnecting from " + selectedDevices[0]);
   fetch("http://localhost:3001/disconnect", {
     method: "post",
     body: JSON.stringify({ device: devicePath }),
@@ -42,7 +41,7 @@ export async function calibrate() {
     });
 }
 
-export async function startStreaming(key) {
+export async function startStreaming() {
   fetch("http://localhost:3001/collectdata", {
     method: "post",
     headers: { "Content-Type": "application/json" },
@@ -57,7 +56,7 @@ export async function startStreaming(key) {
     });
 }
 
-export async function stopStreaming(key) {
+export async function stopStreaming() {
   fetch("http://localhost:3001/stopdata", {
     method: "post",
     headers: { "Content-Type": "application/json" },
