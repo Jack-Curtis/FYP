@@ -9,6 +9,8 @@ export default function Page() {
   const [data, setData] = useState([]);
   var socket = [];
   var count = 0;
+  var xData = [];
+  var yData = [];
 
   useEffect(() => {
     socket = new WebSocket("ws://localhost:8080");
@@ -27,11 +29,11 @@ export default function Page() {
       var newValue = result.data;
 
       if (newValue.includes("Acceleration")) {
+        yData.push(newValue.replace("Acceleration", ""));
+
         count = count + 1;
-        var accelerationData = [
-          ...d,
-          { x: count, y: newValue.replace("Acceleration", "") },
-        ];
+        xData.push(count);
+        var accelerationData = { labels: xData, y: yData };
         return accelerationData;
       } else {
         return [];
