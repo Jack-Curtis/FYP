@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
-import Chart from "./chart";
+import Chart from "./imuGraph";
 import List from "./list";
 import { StartStreaming, StopStreaming } from "./streamingButtons";
 import { calibrate, connectToImu, disconnectImu } from "../utils/utils";
+import "../styles.css";
 
 export default function Page() {
   const [selectedDevices, setSelectedDevices] = useState(["-", "-", "-", "-"]);
   const [data, setData] = useState([]);
+
   var socket = [];
   var count = 0;
   var xData = [];
@@ -51,26 +53,29 @@ export default function Page() {
     return (
       <div>
         <h3>IMU {imuId + 1}:</h3>
-        {<List imuId={imuId} onListChange={handleListChange}></List>}
-        <button onClick={() => connectToImu(selectedDevices[imuId])}>
-          Connect
-        </button>
-        <button onClick={() => disconnectImu(selectedDevices[imuId])}>
-          Disconnect
-        </button>
+        <div className="container">
+          {<List imuId={imuId} onListChange={handleListChange}></List>}
+          <button onClick={() => connectToImu(selectedDevices[imuId])}>
+            Connect
+          </button>
+          <button onClick={() => disconnectImu(selectedDevices[imuId])}>
+            Disconnect
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="page">
       <h1>List of devices:</h1>
       {IMU(0)}
-      {/* {IMU2(1)} */}
-      <button onClick={() => calibrate()}>CALIBRATE IMUs</button>
-      <StartStreaming></StartStreaming>
-      <StopStreaming></StopStreaming>
-      <Chart data={data}></Chart>;
+      <div className="container">
+        <button onClick={() => calibrate()}>CALIBRATE IMUs</button>
+        <StartStreaming></StartStreaming>
+        <StopStreaming></StopStreaming>
+      </div>
+      <Chart data={data}></Chart>
     </div>
   );
 }
