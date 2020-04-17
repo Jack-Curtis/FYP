@@ -31,7 +31,8 @@ export default function Page() {
       var newValue = result.data;
 
       if (newValue.includes("Acceleration")) {
-        yData.push(newValue.replace("Acceleration", ""));
+        var yValue = newValue.split("Acceleration");
+        yData.push(yValue[1]);
 
         count = count + 1;
         xData.push(count);
@@ -70,6 +71,7 @@ export default function Page() {
     <div className="page">
       <h1>List of devices:</h1>
       {IMU(0)}
+      {IMU(1)}
       <div className="container">
         <button onClick={() => calibrate()}>CALIBRATE IMUs</button>
         <StartStreaming></StartStreaming>

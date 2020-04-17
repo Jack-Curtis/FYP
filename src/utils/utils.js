@@ -4,9 +4,11 @@ export async function connectToImu(devicePath) {
     method: "post",
     body: JSON.stringify({ device: devicePath }),
     headers: { "Content-Type": "application/json" },
-  }).then((response) => {
-    return response.json();
-  });
+  })
+    .then((response) => {
+      return response.json();
+    })
+    .then((response) => console.log(response));
 }
 
 export async function disconnectImu(devicePath) {
@@ -14,16 +16,10 @@ export async function disconnectImu(devicePath) {
     method: "post",
     body: JSON.stringify({ device: devicePath }),
     headers: { "Content-Type": "application/json" },
-  })
-    .then((response) => {
-      console.log(response);
-      var message = response.json();
-      return message;
-    })
-    .then((message) => {
-      console.log(message);
-      console.log("message = " + message);
-    });
+  }).then((response) => {
+    var message = response;
+    console.log("message = ", message);
+  });
 }
 
 export async function calibrate() {

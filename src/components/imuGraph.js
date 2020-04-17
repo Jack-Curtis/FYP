@@ -17,7 +17,7 @@ export default function Chart({ data }) {
         borderWidth: 1,
         pointBorderColor: "rgba(75,192,192,1)",
         pointBackgroundColor: "#fff",
-        pointBorderWidth: 5,
+        pointBorderWidth: 2,
         pointHoverRadius: 7,
         pointHoverBackgroundColor: "rgb(255, 37, 186)",
         pointHoverBorderColor: "rgba(220,220,220,1)",
