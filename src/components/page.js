@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from "react";
-import Chart from "./imuGraph";
-import List from "./list";
 import { StartStreaming, StopStreaming } from "./streamingButtons";
-import { calibrate, connectToImu, disconnectImu } from "../utils/utils";
+import { calibrate } from "../utils/utils";
 import "../styles.css";
+import Imu from "./imu";
 
 export default function Page() {
-  const [selectedDevices, setSelectedDevices] = useState(["-", "-", "-", "-"]);
+  // const [selectedDevices, setSelectedDevices] = useState(["-", "-", "-", "-"]);
   const [data, setData] = useState([]);
+  const [imuCount, setimuCount] = useState(1);
+  const [showLogs, setShowLogs] = useState(false);
 
   var socket = [];
-  var count = 0;
-  var xData = [];
-  var yData = [];
 
   useEffect(() => {
     socket = new WebSocket("ws://localhost:8080");
@@ -28,56 +26,47 @@ export default function Page() {
     console.log("FROM SOCKET", result.data);
 
     setData((d) => {
-      var newValue = result.data;
-
-      if (newValue.includes("Acceleration")) {
-        var yValue = newValue.split("Acceleration");
-        yData.push(yValue[1]);
-
-        count = count + 1;
-        xData.push(count);
-        var accelerationData = { labels: xData, y: yData };
-        return accelerationData;
-      } else {
-        return [];
-      }
+      return [...d, result.data];
     });
   }
 
-  function IMU(imuId) {
-    function handleListChange(value) {
-      var state = selectedDevices;
-      state[imuId] = value;
-      setSelectedDevices(() => state);
-    }
-
-    return (
-      <div>
-        <h3>IMU {imuId + 1}:</h3>
-        <div className="container">
-          {<List imuId={imuId} onListChange={handleListChange}></List>}
-          <button onClick={() => connectToImu(selectedDevices[imuId])}>
-            Connect
-          </button>
-          <button onClick={() => disconnectImu(selectedDevices[imuId])}>
-            Disconnect
+  function renderImus() {
+    let imus = [];
+    for (let num = 0; num < imuCount; num++) {
+      imus.push(
+        <div className="horizontal-container">
+          <Imu imuId={num} showLogs={showLogs} data={data}></Imu>
+          <button
+            className="remove-imu"
+            onClick={() => {
+              delete imus[num];
+            }}
+          >
+            X
           </button>
         </div>
-      </div>
-    );
+      );
+    }
+    return imus;
   }
 
   return (
     <div className="page">
-      <h1>List of devices:</h1>
-      {IMU(0)}
-      {IMU(1)}
-      <div className="container">
-        <button onClick={() => calibrate()}>CALIBRATE IMUs</button>
+      <div className="horizontal-container">
+        <h1>IMU DATA CAPTURE</h1>
+      </div>
+      <div className="imuContainer">{renderImus()}</div>
+      <button onClick={() => setimuCount(() => imuCount + 1)}>Add IMU</button>
+      <div className="footer">
+        {/* <button onClick={() => calibrate()}>CALIBRATE IMUs</button> */}
+        <input
+          type="checkbox"
+          name="showLog"
+          onChange={() => setShowLogs(() => !showLogs)}
+        />
         <StartStreaming></StartStreaming>
         <StopStreaming></StopStreaming>
       </div>
-      <Chart data={data}></Chart>
     </div>
   );
 }
