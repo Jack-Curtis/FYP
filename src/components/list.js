@@ -9,11 +9,10 @@ export default function List({ onListChange }) {
   }, []);
 
   async function getList() {
-    let response = await fetch("http://localhost:3001/init");
+    let response = await fetch("http://localhost:3001/getports");
     if (response.status === 200) {
       let portList = await response.json();
       setDeviceList(portList);
-      console.log(portList);
     } else {
       console.log("error");
     }

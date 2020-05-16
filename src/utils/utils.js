@@ -1,4 +1,4 @@
-export async function connectToImu(devicePath) {
+export async function connectToImu(devicePath, changeConnectionStatus) {
   console.log(devicePath);
   fetch("http://localhost:3001/connect", {
     method: "post",
@@ -6,19 +6,29 @@ export async function connectToImu(devicePath) {
     headers: { "Content-Type": "application/json" },
   })
     .then((response) => {
+      console.log(response.status);
+      if (response.status === 200) {
+        changeConnectionStatus(true);
+      } else {
+        changeConnectionStatus(false);
+      }
+
       return response.json();
     })
-    .then((response) => console.log(response));
+    .then((response) => console.log("REPONSE =", response));
 }
 
-export async function disconnectImu(devicePath) {
+export async function disconnectImu(devicePath, changeConnectionStatus) {
   fetch("http://localhost:3001/disconnect", {
     method: "post",
     body: JSON.stringify({ device: devicePath }),
     headers: { "Content-Type": "application/json" },
   }).then((response) => {
-    var message = response;
-    console.log("message = ", message);
+    if (response.status === 200) {
+      changeConnectionStatus(false);
+    } else {
+      changeConnectionStatus(true);
+    }
   });
 }
 
@@ -38,7 +48,7 @@ export async function calibrate() {
 }
 
 export async function startStreaming() {
-  fetch("http://localhost:3001/collectdata", {
+  fetch("http://localhost:3001/startstream", {
     method: "post",
     headers: { "Content-Type": "application/json" },
   })
@@ -53,7 +63,7 @@ export async function startStreaming() {
 }
 
 export async function stopStreaming() {
-  fetch("http://localhost:3001/stopdata", {
+  fetch("http://localhost:3001/stopstream", {
     method: "post",
     headers: { "Content-Type": "application/json" },
   })
@@ -65,4 +75,14 @@ export async function stopStreaming() {
     .then((message) => {
       console.log(message);
     });
+}
+
+export function splitData(d) {
+  let messages = [];
+  let splitData = d.split("+");
+  let prevmessages = messages[splitData[0]];
+
+  // messages[splitData[0]] = [prevmessages, splitData[1]];
+
+  return [splitData[0], splitData[1]];
 }
