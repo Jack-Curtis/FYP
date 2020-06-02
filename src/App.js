@@ -1,12 +1,13 @@
 import React from "react";
 import Page from "./components/page";
+import "./styles.css";
 
-function App() {
+const App = () => {
   return (
     <div className="App">
       <Page></Page>
     </div>
   );
-}
+};
 
 export default App;

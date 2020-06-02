@@ -2,10 +2,11 @@ import React from "react";
 import { startStreaming, stopStreaming } from "../utils/utils";
 import "../styles.css";
 
-export function StartStreaming({ changeStreamState }) {
+export function StartStreaming({ disabled, changeStreamState }) {
   return (
     <button
       className="startStream"
+      disabled={disabled}
       onClick={() => {
         changeStreamState();
         startStreaming(0);

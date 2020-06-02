@@ -1,18 +1,21 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { StartStreaming, StopStreaming } from "./streamingButtons";
-import { calibrate, splitData } from "../utils/utils";
+import { splitData } from "../utils/utils";
 import "../styles.css";
-import Imu from "./imu";
+import Device from "./device";
+import AddDeviceModal from "./addDeviceModal";
+import Chart from "./imuGraph";
 
-export default function Page() {
+const Page = () => {
   const [data, setData] = useState([]);
-  const [imus, setimus] = useState([]);
-  const [inputValue, setInputValue] = useState("");
+  const [devices, setDevices] = useState([]);
   const [showLogs, setShowLogs] = useState(false);
+  const [dataType, setDataType] = useState("Accelerometer");
   const [isStreaming, setIsStreaming] = useState(false);
-  const [imuScreen, setImuScreen] = useState(false);
-  const inputVal = useRef(null);
+  const [showAddDeviceModal, setShowAddDeviceModal] = useState(false);
+
   var socket = [];
+  var dataa = [];
 
   useEffect(() => {
     socket = new WebSocket("ws://localhost:8080");
@@ -25,125 +28,125 @@ export default function Page() {
   }
 
   function showData(result) {
-    console.log("FROM SOCKET", result.data);
-
+    console.log(result.data);
     setData((d) => {
-      let [imuNum, modData] = splitData(result.data);
-      d[imuNum]
-        ? (d[imuNum] = [...d[imuNum], modData])
-        : (d[imuNum] = [modData]);
+      let [deviceNum, modData] = splitData(result.data);
+      var newData = [];
+      for (let i = 0; i < d.length; i++) {
+        let entry = d[i];
+        newData[i] = entry;
+      }
 
-      return d;
+      if (typeof d[deviceNum] === "undefined") {
+        newData[deviceNum] = [modData];
+      } else {
+        let entry = d[deviceNum];
+        entry.push(modData);
+        newData[deviceNum] = entry;
+      }
+
+      return newData;
     });
   }
 
   function imuController(func, name) {
     if (func === "add") {
-      setimus((items) => {
-        let imu = { name: name };
-        return [...items, imu];
+      setDevices((items) => {
+        let device = { name: name };
+        return [...items, device];
       });
-      setImuScreen(false);
-      setInputValue("");
+      setShowAddDeviceModal(false);
     } else if (func === "remove") {
-      setimus((items) => {
-        let result = items.filter((imu) => {
-          return imu.name.toString() !== name.toString();
+      setDevices((items) => {
+        let result = items.filter((device) => {
+          return device.name.toString() !== name.toString();
         });
         return result;
       });
     }
   }
 
-  function ImuScreen() {
-    function handleAddImu(e) {
-      // inputVal.current.focus();
-      console.log("hello", e);
-      console.log(e.target.value);
-      setInputValue(e.target.value);
-    }
-    return (
-      // <div className="overlay-container">
-      //   <div className="overlay"></div>
-      //   <div className="overlay-contents">
-      //
-      <div>
-        <div className="overlay"></div>
-        <div className="overlay-container">
-          <div className="overlay-contents">
-            <h2>Add Sensor</h2>
-            <div className="horizontal-container">
-              <label>Enter sensor name:</label>
-              <input
-                placeholder="Sensor Name"
-                ref={inputVal}
-                // value={inputValue}
-                onBlur={handleAddImu}
-              ></input>
-            </div>
-            <button
-              className="add-imu-btn"
-              name="imu-add"
-              onMouseUp={(e) => {
-                imuController("add", inputValue);
-              }}
-            >
-              +
-            </button>{" "}
-          </div>
-        </div>
-      </div>
-
-      //   </div>
-      // </div>
-    );
-  }
-
   return (
-    <div>
-      <div>{imuScreen ? <ImuScreen></ImuScreen> : null}</div>
-      <div className="page">
+    <div className="Page">
+      <div>
+        {showAddDeviceModal ? (
+          <AddDeviceModal imuController={imuController}></AddDeviceModal>
+        ) : null}
+      </div>
+      <div>
         <div className="horizontal-container">
           <h1>IMU DATA CAPTURE</h1>
         </div>
-
-        <div className="imuContainer">
-          {imus.map((imu, index) => {
-            console.log(data[index]);
+        <div className="device-container">
+          {devices.map((device, index) => {
             return (
-              <div className="horizontal-container">
-                <Imu
-                  name={imu.name}
+              <div className="individual-device-container" key={index}>
+                <Device
+                  name={device.name}
                   showLogs={showLogs}
-                  showGraphs={false}
+                  isStreaming={isStreaming}
+                  showGraphs={true}
                   data={data[index]}
                   id={index}
-                ></Imu>
+                  // key={data[index] ? data[index].length : index}
+                  dataType={dataType}
+                ></Device>
               </div>
             );
           })}
         </div>
         <div className="horizontal-container">
-          <button name="imu-add" onClick={() => setImuScreen(true)}>
+          <button name="imu-add" onClick={() => setShowAddDeviceModal(true)}>
             Add IMU
           </button>
         </div>
-        {imuScreen ? null : (
+        {showAddDeviceModal ? null : (
           <div className="footer">
-            <input
-              type="checkbox"
-              name="showLog"
-              onChange={() => setShowLogs(() => !showLogs)}
-            />
-            <StartStreaming
-              changeStreamState={() => setIsStreaming(true)}
-            ></StartStreaming>
-            <StopStreaming
-              changeStreamState={() => setIsStreaming(false)}
-            ></StopStreaming>
+            <div className="vertical-container">
+              <div className="horizontal-container">
+                <label>Show logs</label>
+                <input
+                  type="checkbox"
+                  name="showLog"
+                  id="showLog"
+                  onChange={() => setShowLogs(() => !showLogs)}
+                />
+                <label>Show graphs</label>
+                <input
+                  type="checkbox"
+                  name="showLog"
+                  id="showLog"
+                  // onChange={() => setShowLogs(() => !showLogs)}
+                />
+
+                <select
+                  className="data-select"
+                  onChange={(e) => setDataType(e.target.value)}
+                >
+                  <option key={1}> Accelerometer </option>
+                  <option key={2}> Gyroscope </option>
+                  <option key={3}> Magnetometer </option>
+                </select>
+              </div>
+
+              <div className="horizontal-container">
+                {isStreaming ? (
+                  <StopStreaming
+                    changeStreamState={() => setIsStreaming(false)}
+                  ></StopStreaming>
+                ) : (
+                  <StartStreaming
+                    disabled={!devices.length}
+                    changeStreamState={() => setIsStreaming(true)}
+                  ></StartStreaming>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>
     </div>
   );
-}
+};
+
+export default Page;

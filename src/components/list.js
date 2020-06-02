@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../styles.css";
 
-export default function List({ onListChange }) {
+const List = ({ onListChange }) => {
   const [deviceList, setDeviceList] = useState(0);
 
   useEffect(() => {
@@ -12,6 +12,7 @@ export default function List({ onListChange }) {
     let response = await fetch("http://localhost:3001/getports");
     if (response.status === 200) {
       let portList = await response.json();
+      console.log(portList);
       setDeviceList(portList);
     } else {
       console.log("error");
@@ -32,4 +33,6 @@ export default function List({ onListChange }) {
         : null}
     </select>
   );
-}
+};
+
+export default List;
