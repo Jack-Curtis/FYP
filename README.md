@@ -1,5 +1,7 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+# FYP-FE
+
 This is the Front-End software used to interact with the sensor modules of the project.
 
 For this software to work, the Back-end software must also be running so the endpoints can be hit.
